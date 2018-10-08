@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Hardware;
+using KickDive.Hardware;
 
 public class DebugGameManager : MonoBehaviour {
 
@@ -36,18 +36,18 @@ public class DebugGameManager : MonoBehaviour {
     }
 
     private void PrimaryButtonStartedHandler(HardwareInput sender) {
-        Debug.Log("Primary Button Started");
+        //Debug.Log("Primary Button Started");
     }
 
     private void PrimaryButtonEndedHandler(HardwareInput sender) {
-        Debug.Log("Primary Button Ended");
+        //Debug.Log("Primary Button Ended");
     }
 
     private void SecondaryButtonStartedHandler(HardwareInput sender) {
-        Debug.Log("Secondary Button Started");
+        //Debug.Log("Secondary Button Started");
     }
 
     private void SecondaryButtonEndedHandler(HardwareInput sender) {
-        Debug.Log("Secondary Button Ended");
+        //Debug.Log("Secondary Button Ended");
     }
 }

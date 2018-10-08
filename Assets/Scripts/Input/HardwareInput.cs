@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Hardware {
+namespace KickDive.Hardware {
     public class HardwareInput {
 
         public delegate void PrimaryButtonStarted(HardwareInput sender);
