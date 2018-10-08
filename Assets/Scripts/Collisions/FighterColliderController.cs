@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using KickDive.Utility;
 
-
+// Base class for managing fighter collider groups, and changing collider group states based on animation frames
 namespace KickDive.Fighter {
     public class FighterColliderController : MonoBehaviour {
 
         [SerializeField]
         private AnimationEventRepeater _animationEventController;
         [SerializeField]
-        private List<FighterColliderGroup> _colliderGroups;
+        protected List<FighterColliderGroup> _colliderGroups;
 
         private void OnEnable() {
             if (_animationEventController != null){
@@ -38,13 +38,13 @@ namespace KickDive.Fighter {
             }
         }
 
+        // Override methods
+
         // Note that this method will handle animation changes AFTER the update method for this frame has been called
         // Any changes to colliders will affect physics for the NEXT FixedUpdate call, and thus the next frame
-        private void HandleAnimationEvent(AnimationEventRepeater.AnimationEventArgs eventArgs){
-            //Debug.Log("Animation Event Handling");
-        }
+        public virtual void HandleAnimationEvent(AnimationEventRepeater.AnimationEventArgs eventArgs){ }
 
-        private void HandleHitDetected(FighterColliderGroup.CollisionType collisionType){
+        public virtual void HandleHitDetected(FighterColliderGroup.CollisionType collisionType){
             if (collisionType == FighterColliderGroup.CollisionType.Hit) {
                 Debug.Log(gameObject.name + " TOOK a hit");
             } else if (collisionType == FighterColliderGroup.CollisionType.Hurt) {
