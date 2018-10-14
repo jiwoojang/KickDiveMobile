@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using KickDive.Hardware;
+using Photon.Pun;
 
 public class DebugGameManager : MonoBehaviour {
 
