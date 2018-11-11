@@ -7,6 +7,7 @@ using Photon.Pun;
 public class DebugGameManager : MonoBehaviour {
 
     private InputManager _inputManager;
+    private bool hasPlayerPrefabInstantiated;
 
     private void Awake() {
         if (InputManager.instance != null) {
@@ -33,6 +34,18 @@ public class DebugGameManager : MonoBehaviour {
             _inputManager.gameInput.OnPrimaryButtonEnded -= PrimaryButtonEndedHandler;
             _inputManager.gameInput.OnSecondaryButtonStarted -= SecondaryButtonStartedHandler;
             _inputManager.gameInput.OnSecondaryButtonEnded -= SecondaryButtonEndedHandler;
+        }
+    }
+
+    private void Update() {
+        if (NetworkManager.instance.isConnectedToMaster && !hasPlayerPrefabInstantiated) {
+            if (!NetworkManager.instance.isInRoom) {
+                NetworkManager.instance.JoinOrCreateRoom("DebugRoom");
+                return;
+            }
+
+            NetworkManager.instance.InstantiatePlayerPrefab();
+            hasPlayerPrefabInstantiated = true;
         }
     }
 

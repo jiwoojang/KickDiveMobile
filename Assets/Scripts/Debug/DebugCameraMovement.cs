@@ -31,6 +31,17 @@ public class DebugCameraMovement : MonoBehaviour {
     }
 
 	private void Update() {
+        if (_playerTransform == null) {
+            GameObject playerGameObject = GameObject.Find("DebugPlayer"); 
+
+            if (playerGameObject == null) {
+                // Player Prefab has not been created yet, bail.
+                return;
+            }
+
+            _playerTransform = playerGameObject.transform;
+        }
+
         transform.position = _playerTransform.position;
 	}
 

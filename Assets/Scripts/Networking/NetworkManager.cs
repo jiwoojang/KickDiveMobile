@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using KickDive.Utility;
-using Photon;
+using KickDive.Match;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
@@ -16,6 +15,9 @@ namespace Photon.Pun {
             // PLayer 2 starts on the left side of the screen
             Player2,
         }
+
+        public bool isConnectedToMaster;
+        public bool isInRoom;
 
         [SerializeField]
         private string player1RoomPropertyKey, player2RoomPropertyKey;
@@ -57,6 +59,7 @@ namespace Photon.Pun {
 
         public override void OnConnectedToMaster() {
             Debug.Log("Connected to Photon master server");
+            isConnectedToMaster = true;
         }
 
         // Joining a room
@@ -74,6 +77,8 @@ namespace Photon.Pun {
 
         public override void OnJoinedRoom() {
             base.OnJoinedRoom();
+
+            isInRoom = true;
 
             Debug.Log("Connected to room: " + PhotonNetwork.CurrentRoom.Name);
             Hashtable setValue = new Hashtable();
@@ -96,7 +101,11 @@ namespace Photon.Pun {
             }
 
             PhotonNetwork.CurrentRoom.SetCustomProperties(setValue, expectedValue);
-            GameUtility.SetPlayerSpawn(playerNumber);
+            MatchManager matchManager = MatchManager.instance;
+
+            if (matchManager != null) {
+                matchManager.SetPlayerSpawn(playerNumber);
+            }
         }
 
         public void InstantiatePlayerPrefab() {
@@ -105,7 +114,7 @@ namespace Photon.Pun {
                 return;
             }
 
-            PhotonNetwork.Instantiate(_playerPrefabName, GameUtility.playerSpawn.position, GameUtility.playerSpawn.rotation);
+            PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation);
         }
     }
 }
