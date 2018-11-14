@@ -4,18 +4,22 @@ using UnityEngine;
 using KickDive.Hardware;
 using Photon.Pun;
 
+// A class used for debugging game properties/application level functionality 
+// Not meant to be included in the final game
 public class DebugGameManager : MonoBehaviour {
 
-    private InputManager _inputManager;
-    private bool hasPlayerPrefabInstantiated;
+    private InputManager    _inputManager;
+    private NetworkManager  _networkManager;
 
-    private void Awake() {
+    public void Start() {
         if (InputManager.instance != null) {
             _inputManager = InputManager.instance;
         }
-    }
 
-    private void OnEnable() {
+        if (NetworkManager.instance != null) {
+            _networkManager = NetworkManager.instance;
+        }
+
         if (_inputManager != null) {
             // Subscribe to input events
             _inputManager.gameInput.OnPrimaryButtonStarted += PrimaryButtonStartedHandler;
@@ -25,9 +29,14 @@ public class DebugGameManager : MonoBehaviour {
         } else {
             Debug.LogError("Attempting to subscribe to input manager when it does not exist");
         }
+
+        if (_networkManager != null) {
+            _networkManager.OnConnectedToPhotonMaster += OnConnectedToMaster;
+            _networkManager.OnConnectedToRoom += OnConnectedToRoom;
+        }
     }
 
-    private void OnDisable() {
+    public void OnDisable() {
         if (_inputManager != null) {
             // Unsubscribe from input events
             _inputManager.gameInput.OnPrimaryButtonStarted -= PrimaryButtonStartedHandler;
@@ -35,18 +44,19 @@ public class DebugGameManager : MonoBehaviour {
             _inputManager.gameInput.OnSecondaryButtonStarted -= SecondaryButtonStartedHandler;
             _inputManager.gameInput.OnSecondaryButtonEnded -= SecondaryButtonEndedHandler;
         }
+
+        if (_networkManager != null) {
+            _networkManager.OnConnectedToPhotonMaster -= OnConnectedToMaster;
+            _networkManager.OnConnectedToRoom -= OnConnectedToRoom;
+        }
     }
 
-    private void Update() {
-        if (NetworkManager.instance.isConnectedToMaster && !hasPlayerPrefabInstantiated) {
-            if (!NetworkManager.instance.isInRoom) {
-                NetworkManager.instance.JoinOrCreateRoom("DebugRoom");
-                return;
-            }
+    private void OnConnectedToMaster() {
+        _networkManager.JoinOrCreateRoom("DebugRoom");
+    }
 
-            NetworkManager.instance.InstantiatePlayerPrefab();
-            hasPlayerPrefabInstantiated = true;
-        }
+    private void OnConnectedToRoom(string roomName) {
+        _networkManager.InstantiatePlayerPrefab();
     }
 
     private void PrimaryButtonStartedHandler(HardwareInput sender) {

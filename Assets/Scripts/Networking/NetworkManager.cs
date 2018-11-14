@@ -16,14 +16,21 @@ namespace Photon.Pun {
             Player2,
         }
 
+        public static NetworkManager instance;
+        public static PlayerNumber playerNumber = PlayerNumber.None;
+
+        // Public facing events for non-photon views to subscribe to 
+        public delegate void ConnectedToPhotonMaster();
+        public delegate void ConnectedToRoom(string roomName);
+
+        public event ConnectedToPhotonMaster    OnConnectedToPhotonMaster;
+        public event ConnectedToRoom            OnConnectedToRoom;
+
         public bool isConnectedToMaster;
-        public bool isInRoom;
+        public bool isConnectedToRoom;
 
         [SerializeField]
         private string player1RoomPropertyKey, player2RoomPropertyKey;
-
-        public static NetworkManager instance;
-        public static PlayerNumber playerNumber = PlayerNumber.None;
 
         [SerializeField]
         private string _playerPrefabName;
@@ -60,6 +67,10 @@ namespace Photon.Pun {
         public override void OnConnectedToMaster() {
             Debug.Log("Connected to Photon master server");
             isConnectedToMaster = true;
+
+            // Fire Event 
+            if (OnConnectedToPhotonMaster != null)
+                OnConnectedToPhotonMaster();
         }
 
         // Joining a room
@@ -78,9 +89,11 @@ namespace Photon.Pun {
         public override void OnJoinedRoom() {
             base.OnJoinedRoom();
 
-            isInRoom = true;
+            isConnectedToRoom = true;
 
             Debug.Log("Connected to room: " + PhotonNetwork.CurrentRoom.Name);
+
+            // Set custom room properties
             Hashtable setValue = new Hashtable();
             Hashtable expectedValue = new Hashtable();
 
@@ -101,11 +114,12 @@ namespace Photon.Pun {
             }
 
             PhotonNetwork.CurrentRoom.SetCustomProperties(setValue, expectedValue);
-            MatchManager matchManager = MatchManager.instance;
 
-            if (matchManager != null) {
-                matchManager.SetPlayerSpawn(playerNumber);
-            }
+            MatchManager.instance.SetPlayerSpawn(playerNumber);
+
+            // Fire Event
+            if (OnConnectedToRoom != null)
+                OnConnectedToRoom(PhotonNetwork.CurrentRoom.Name);
         }
 
         public void InstantiatePlayerPrefab() {
