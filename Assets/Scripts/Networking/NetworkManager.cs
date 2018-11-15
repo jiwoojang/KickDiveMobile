@@ -59,6 +59,8 @@ namespace Photon.Pun {
 
             if (!PhotonNetwork.IsConnected) {
                 PhotonNetwork.ConnectUsingSettings();
+                PhotonNetwork.SerializationRate = 20;
+                PhotonNetwork.SendRate = 30;
             } else {
                 Debug.Log("Network Manager is attempting to initialize while already connected");
             }
