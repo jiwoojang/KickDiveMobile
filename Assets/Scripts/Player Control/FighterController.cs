@@ -2,72 +2,82 @@
 using System.Collections.Generic;
 using UnityEngine;
 using KickDive.Hardware;
+using KickDive.Match;
+using Photon.Pun;
 
 namespace KickDive.Fighter {
     [RequireComponent(typeof(Rigidbody2D))]
     public class FighterController : MonoBehaviour {
 
-        public float jumpForce;
-        public float kickForce;
-        public bool isGrounded { get; private set; }
-        public bool isKicking { get; private set; }
-        public Vector2 kickDirectionVector = new Vector2(1.0f, -1.0f);
+        public float    jumpForce;
+        public float    kickForce;
+        public bool     isGrounded { get; private set; }
+        public bool     isKicking { get; private set; }
+        public Vector2  kickDirectionVector = new Vector2(1.0f, -1.0f);
 
         [SerializeField]
-        private Animator _animator;
+        private Animator                    _animator;
         [SerializeField]
-        private SpriteRenderer _spriteRenderer;
+        private FighterColliderController   _colliderController;
         [SerializeField]
-        private BoxCollider2D _boxCollider;
-        private Rigidbody2D _rigidbody2D;
-        private Vector2 _normalizedKickDirectionVector;
-        private int _diveAnimatorHash;
-        private int _kickAnimatorHash;
-        private int _idleAnimatorHash;
+        private SpriteRenderer              _spriteRenderer;
+        [SerializeField]
+        private BoxCollider2D               _boxCollider;
+
+        private Rigidbody2D     _rigidbody2D;
+        private Vector2         _normalizedDiveDirectionVector;
+        private Vector2         _normalizedKickDirectionVector;
+        private int             _diveAnimatorHash;
+        private int             _kickAnimatorHash;
+        private int             _idleAnimatorHash;
+        private PhotonView      _photonView;
 
         private void Awake() {
             _rigidbody2D = GetComponent<Rigidbody2D>();
-            _boxCollider = GetComponent<BoxCollider2D>();
-            _normalizedKickDirectionVector = kickDirectionVector.normalized;
+            
+            // Grab player movement directions based on 
+            _normalizedKickDirectionVector = MatchManager.instance.KickDirection.normalized;
+            _normalizedDiveDirectionVector = MatchManager.instance.DiveDirection.normalized;
+
+            if (NetworkManager.playerNumber == NetworkManager.PlayerNumber.Player1) {
+                _animator.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+                _colliderController.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+            }
+
+            // Set up animator controls
             _diveAnimatorHash = Animator.StringToHash("Dive");
             _kickAnimatorHash = Animator.StringToHash("Kick");
             _idleAnimatorHash = Animator.StringToHash("Idle");
+
+            _photonView = PhotonView.Get(this);
         }
 
         private void OnEnable() {
-            // Debug purposes
-            if (InputManager.instance != null) {
-                InputManager.instance.gameInput.OnPrimaryButtonStarted += StartDive;
-                InputManager.instance.gameInput.OnSecondaryButtonStarted += StartKick;
+            if (_photonView != null) {
+                if (_photonView.IsMine) {
+                    if (InputManager.instance != null) {
+                        InputManager.instance.gameInput.OnPrimaryButtonStarted += StartDive;
+                        InputManager.instance.gameInput.OnSecondaryButtonStarted += StartKick;
+                    }
+                }
+            } else {
+                Debug.LogError("Cannot find photon view to determine input owner of this FighterController");
             }
         }
 
         private void OnDisable() {
-            if (InputManager.instance != null) {
-                InputManager.instance.gameInput.OnPrimaryButtonStarted -= StartDive;
-                InputManager.instance.gameInput.OnSecondaryButtonStarted -= StartKick;
+            if (_photonView != null) {
+                if (_photonView.IsMine) {
+                    if (InputManager.instance != null) {
+                        InputManager.instance.gameInput.OnPrimaryButtonStarted -= StartDive;
+                        InputManager.instance.gameInput.OnSecondaryButtonStarted -= StartKick;
+                    }
+                }
             }
         }
 
-        private bool Dive() {
-            if (isGrounded) {
-                _rigidbody2D.AddForce(Vector2.up * jumpForce);
-                isGrounded = false;
-                return true;
-            }
-            return false;
-        }
-
-        private bool Kick() {
-            if (!isGrounded) {
-                _rigidbody2D.AddForce(kickDirectionVector * kickForce);
-                isKicking = true;
-                return true;
-            }
-            return false;
-        }
-
-        private void StartDive(HardwareInput input) {
+        [PunRPC]
+        private void HandleStartDive() {
             if (Dive()) {
                 // Reset the other triggers
                 _animator.ResetTrigger(_idleAnimatorHash);
@@ -77,7 +87,8 @@ namespace KickDive.Fighter {
             }
         }
 
-        private void StartKick(HardwareInput input) {
+        [PunRPC]
+        private void HandleStartKick() {
             if (Kick()) {
                 // Reset the other triggers
                 _animator.ResetTrigger(_idleAnimatorHash);
@@ -85,6 +96,33 @@ namespace KickDive.Fighter {
 
                 _animator.SetTrigger(_kickAnimatorHash);
             }
+        }
+
+        private bool Dive() {
+            if (isGrounded) {
+                _rigidbody2D.AddForce(_normalizedDiveDirectionVector * jumpForce);
+                isGrounded = false;
+                return true;
+            }
+            return false;
+        }
+
+        private bool Kick() {
+            if (!isGrounded) {
+                _rigidbody2D.AddForce(_normalizedKickDirectionVector * kickForce);
+                isKicking = true;
+                return true;
+            }
+            return false;
+        }
+
+        // These RPC's are buffered to give the client and master the most sychronization
+        private void StartDive(HardwareInput input) {
+            _photonView.RPC("HandleStartDive", RpcTarget.AllViaServer);
+        }
+
+        private void StartKick(HardwareInput input) {
+            _photonView.RPC("HandleStartKick", RpcTarget.AllViaServer);
         }
 
         private void OnCollisionEnter2D(Collision2D collision) {
@@ -99,8 +137,12 @@ namespace KickDive.Fighter {
                 _animator.SetTrigger(_idleAnimatorHash);
 
                 // Stop the movement of the player, to prevent rigidbodies from falling over
-                _rigidbody2D.velocity = Vector2.zero;
-                _rigidbody2D.angularVelocity = 0f;
+
+                if (collision.gameObject.layer == LayerMask.NameToLayer("ArenaGround")) {
+                    _rigidbody2D.velocity = Vector2.zero;
+                    _rigidbody2D.angularVelocity = 0f;
+                    _rigidbody2D.Sleep();
+                }
             }
         }
 

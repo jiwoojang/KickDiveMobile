@@ -219,6 +219,8 @@ MonoBehaviour:
   _playerRightSpawn: {fileID: 1891517229}
   _playerLeftSpawn: {fileID: 1351792068}
   playerSpawn: {fileID: 0}
+  DiveDirection: {x: 0, y: 0}
+  KickDirection: {x: 0, y: 0}
 --- !u!1 &344776584
 GameObject:
   m_ObjectHideFlags: 0
@@ -1552,7 +1554,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1891517228}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.6482363, y: 0.6257348, z: -22.693249}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []

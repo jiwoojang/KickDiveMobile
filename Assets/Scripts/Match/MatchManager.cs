@@ -18,7 +18,9 @@ namespace KickDive.Match {
         [SerializeField]
         private Transform _playerLeftSpawn;
 
-        public Transform playerSpawn;
+        public Transform    playerSpawn;
+        public Vector2      DiveDirection;
+        public Vector2      KickDirection;
 
         private void Awake() {
             if (instance == null) {
@@ -34,8 +36,10 @@ namespace KickDive.Match {
 
             if (_playerLeftSpawn == null) {
                     Debug.LogError("Player 2 spawn has not been set");
-                }
             }
+
+            DiveDirection = Vector2.up;
+        }
 
         // For setting the player number, and spawn
         public void SetPlayerSpawn(NetworkManager.PlayerNumber playerNumber) {
@@ -45,12 +49,16 @@ namespace KickDive.Match {
             }
 
             switch (playerNumber) {
-                case NetworkManager.PlayerNumber.Player1:
-                    playerSpawn = _playerRightSpawn;
-                    break;
-                case NetworkManager.PlayerNumber.Player2:
-                    playerSpawn = _playerLeftSpawn;
-                    break;
+                case NetworkManager.PlayerNumber.Player1: {
+                        playerSpawn = _playerRightSpawn;
+                        KickDirection = new Vector2(-1.0f, -1.0f);
+                        break;
+                    }
+                case NetworkManager.PlayerNumber.Player2: {
+                        playerSpawn = _playerLeftSpawn;
+                        KickDirection = new Vector2(1.0f, -1.0f);
+                        break;
+                    }
             }
         }
     }

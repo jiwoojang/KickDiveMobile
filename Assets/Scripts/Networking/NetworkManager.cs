@@ -101,7 +101,7 @@ namespace Photon.Pun {
 
             // First person to join gets P1
             // TODO: Make this a selectable option?
-            if (PhotonNetwork.CurrentRoom.PlayerCount != 0) {
+            if (PhotonNetwork.CurrentRoom.PlayerCount > 1) {
                 playerNumber = PlayerNumber.Player2;
 
                 setValue.Add(player2RoomPropertyKey, PhotonNetwork.LocalPlayer.UserId);
@@ -116,6 +116,8 @@ namespace Photon.Pun {
             }
 
             PhotonNetwork.CurrentRoom.SetCustomProperties(setValue, expectedValue);
+
+            Debug.Log("Joined as Player Number: " + playerNumber);
 
             MatchManager.instance.SetPlayerSpawn(playerNumber);
 
