@@ -24,10 +24,14 @@ MonoBehaviour:
     EnableLobbyStatistics: 0
     NetworkLogging: 1
   StartInOfflineMode: 0
-  PunLogging: 2
+  PunLogging: 0
   EnableSupportLogger: 0
   RunInBackground: 1
   RpcList:
   - HandleStartDive
   - HandleStartKick
+  - HandleStartNewRound
+  - HandleWonRound
+  - HandleAcknowledgeRonRound
+  - HandleAcknowledgeWonRound
   DisableAutoOpenWizard: 1

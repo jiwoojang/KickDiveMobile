@@ -39,17 +39,22 @@ namespace KickDive.Fighter {
             _normalizedKickDirectionVector = MatchManager.instance.KickDirection.normalized;
             _normalizedDiveDirectionVector = MatchManager.instance.DiveDirection.normalized;
 
-            if (NetworkManager.playerNumber == NetworkManager.PlayerNumber.Player1) {
+            _photonView = PhotonView.Get(this);
+
+            // This is gross, but custom properties are not ready by the time this check is made
+            // TODO: Figure out a better way to get this info on time
+            if (_photonView.Owner.ActorNumber == 1) {
                 _animator.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
                 _colliderController.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
             }
 
+            // Set up win conditions
+            _colliderController.OnPlayerWonRound += OnPlayerWonRound;
+
             // Set up animator controls
             _diveAnimatorHash = Animator.StringToHash("Dive");
             _kickAnimatorHash = Animator.StringToHash("Kick");
-            _idleAnimatorHash = Animator.StringToHash("Idle");
-
-            _photonView = PhotonView.Get(this);
+            _idleAnimatorHash = Animator.StringToHash("Idle");      
         }
 
         private void OnEnable() {
@@ -66,13 +71,9 @@ namespace KickDive.Fighter {
         }
 
         private void OnDisable() {
-            if (_photonView != null) {
-                if (_photonView.IsMine) {
-                    if (InputManager.instance != null) {
-                        InputManager.instance.gameInput.OnPrimaryButtonStarted -= StartDive;
-                        InputManager.instance.gameInput.OnSecondaryButtonStarted -= StartKick;
-                    }
-                }
+            if (InputManager.instance != null) {
+                InputManager.instance.gameInput.OnPrimaryButtonStarted -= StartDive;
+                InputManager.instance.gameInput.OnSecondaryButtonStarted -= StartKick;
             }
         }
 
@@ -154,6 +155,22 @@ namespace KickDive.Fighter {
                 _boxCollider.size = spriteSize;
                 _boxCollider.offset = _spriteRenderer.sprite.bounds.center;
             }
+        }
+
+        public void OnPlayerWonRound() {
+            _photonView.RPC("HandleWonRound", RpcTarget.Others, NetworkManager.playerNumber);
+        }
+
+        [PunRPC]
+        public void HandleWonRound(PlayerNumber roundWinningPlayer) {
+            _photonView.RPC("HandleAcknowledgeWonRound", RpcTarget.AllViaServer, roundWinningPlayer);
+        }
+
+        [PunRPC]
+        public void HandleAcknowledgeWonRound(PlayerNumber roundWinningPlayer) {
+            Debug.Log(roundWinningPlayer + " won the round!");
+
+            MatchManager.instance.StartNewRound();
         }
 
         private void Update() {

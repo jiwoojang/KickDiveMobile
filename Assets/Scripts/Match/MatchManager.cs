@@ -6,6 +6,14 @@ using Photon.Pun;
 // A class that handles all match specific work
 // This may include per-round management
 namespace KickDive.Match {
+    public enum PlayerNumber {
+        None,
+        // Player 1 starts on the right side of the screen
+        Player1,
+        // PLayer 2 starts on the left side of the screen
+        Player2,
+    }
+
     public class MatchManager : MonoBehaviour {
 
         public static MatchManager instance;
@@ -18,6 +26,7 @@ namespace KickDive.Match {
         [SerializeField]
         private Transform _playerLeftSpawn;
 
+        [HideInInspector]
         public Transform    playerSpawn;
         public Vector2      DiveDirection;
         public Vector2      KickDirection;
@@ -42,24 +51,31 @@ namespace KickDive.Match {
         }
 
         // For setting the player number, and spawn
-        public void SetPlayerSpawn(NetworkManager.PlayerNumber playerNumber) {
-            if (playerNumber == NetworkManager.PlayerNumber.None) {
+        public void SetPlayerSpawn(PlayerNumber playerNumber) {
+            if (playerNumber == PlayerNumber.None) {
                 Debug.LogError("No provided player number, bailing");
                 return;
             }
 
             switch (playerNumber) {
-                case NetworkManager.PlayerNumber.Player1: {
+                case PlayerNumber.Player1: {
                         playerSpawn = _playerRightSpawn;
                         KickDirection = new Vector2(-1.0f, -1.0f);
                         break;
                     }
-                case NetworkManager.PlayerNumber.Player2: {
+                case PlayerNumber.Player2: {
                         playerSpawn = _playerLeftSpawn;
                         KickDirection = new Vector2(1.0f, -1.0f);
                         break;
                     }
             }
+        }
+
+        public void StartNewRound() {
+            // Tear down player
+            NetworkManager.instance.DestroyPlayerPrefab();
+            // Restart player
+            NetworkManager.instance.InstantiatePlayerPrefab();
         }
     }
 }

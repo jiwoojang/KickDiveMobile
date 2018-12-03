@@ -8,14 +8,6 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 namespace Photon.Pun {
     public class NetworkManager : MonoBehaviourPunCallbacks {
 
-        public enum PlayerNumber {
-            None,
-            // Player 1 starts on the right side of the screen
-            Player1, 
-            // PLayer 2 starts on the left side of the screen
-            Player2,
-        }
-
         public static NetworkManager instance;
         public static PlayerNumber playerNumber = PlayerNumber.None;
 
@@ -29,12 +21,14 @@ namespace Photon.Pun {
         public bool isConnectedToMaster;
         public bool isConnectedToRoom;
 
-        [SerializeField]
-        private string player1RoomPropertyKey, player2RoomPropertyKey;
+        public string player1RoomPropertyKey;
+        public string player2RoomPropertyKey;
 
         [SerializeField]
         private string _playerPrefabName;
         private string _gameVersion = "1.0";
+
+        private PhotonView _playerPrefabPhotonView;
 
         public override void OnEnable() {
             // Register the manager as a callback reciever
@@ -104,15 +98,15 @@ namespace Photon.Pun {
             if (PhotonNetwork.CurrentRoom.PlayerCount > 1) {
                 playerNumber = PlayerNumber.Player2;
 
-                setValue.Add(player2RoomPropertyKey, PhotonNetwork.LocalPlayer.UserId);
+                setValue.Add(player2RoomPropertyKey, PhotonNetwork.LocalPlayer.ActorNumber);
 
-                expectedValue.Add(player2RoomPropertyKey, PhotonNetwork.LocalPlayer.UserId);
+                expectedValue.Add(player2RoomPropertyKey, PhotonNetwork.LocalPlayer.ActorNumber);
             } else {
                 playerNumber = PlayerNumber.Player1;
 
-                setValue.Add(player1RoomPropertyKey, PhotonNetwork.LocalPlayer.UserId);
+                setValue.Add(player1RoomPropertyKey, PhotonNetwork.LocalPlayer.ActorNumber);
 
-                expectedValue.Add(player1RoomPropertyKey, PhotonNetwork.LocalPlayer.UserId);
+                expectedValue.Add(player1RoomPropertyKey, PhotonNetwork.LocalPlayer.ActorNumber);
             }
 
             PhotonNetwork.CurrentRoom.SetCustomProperties(setValue, expectedValue);
@@ -132,7 +126,20 @@ namespace Photon.Pun {
                 return;
             }
 
-            PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation);
+            _playerPrefabPhotonView = PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation).GetComponent<PhotonView>();
+            _playerPrefabPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
+            if (_playerPrefabPhotonView == null) {
+                Debug.LogError("Player prefab has no photon view! This is an error");
+            }
+        }
+        
+        public void DestroyPlayerPrefab() {
+            if (PhotonNetwork.CurrentRoom == null) {
+                Debug.LogError("Cannot destroy player prefab, not connected to room. Bailing");
+                return;
+            }
+
+            PhotonNetwork.Destroy(_playerPrefabPhotonView);
         }
     }
 }

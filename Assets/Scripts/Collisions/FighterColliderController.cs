@@ -7,6 +7,10 @@ using KickDive.Utility;
 namespace KickDive.Fighter {
     public class FighterColliderController : MonoBehaviour {
 
+        public delegate void FighterWonRound();
+
+        public event FighterWonRound OnPlayerWonRound;
+
         [SerializeField]
         private AnimationEventRepeater _animationEventController;
         [SerializeField]
@@ -49,6 +53,10 @@ namespace KickDive.Fighter {
                 Debug.Log(gameObject.name + " TOOK a hit");
             } else if (collisionType == FighterColliderGroup.CollisionType.Hurt) {
                 Debug.Log(gameObject.name + " GAVE a hit");
+
+                // Emit round won event for winner
+                if (OnPlayerWonRound != null)
+                    OnPlayerWonRound();
             }
         }
     }
