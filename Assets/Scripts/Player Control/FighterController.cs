@@ -170,7 +170,7 @@ namespace KickDive.Fighter {
         public void HandleAcknowledgeWonRound(PlayerNumber roundWinningPlayer) {
             Debug.Log(roundWinningPlayer + " won the round!");
 
-            MatchManager.instance.StartNewRound();
+            MatchManager.instance.SetPlayerWonRound(roundWinningPlayer);
         }
 
         private void Update() {

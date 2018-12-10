@@ -5,16 +5,23 @@ using UnityEngine;
 namespace KickDive.Hardware{
     public class InputManager : MonoBehaviour {
 
+        private enum InputLockStatus {
+            None, 
+            Locked, 
+            Unlocked
+        }
+
         enum GameplayInputType {
             PCDebug,
             XboxController
         }
 
-        public static InputManager instance;
-        public HardwareInput gameInput { get; private set; }
+        public static InputManager  instance;
+        public HardwareInput        gameInput { get; private set; }
 
         [SerializeField]
-        private GameplayInputType _inputType;
+        private GameplayInputType   _inputType;
+        private InputLockStatus     _inputLockStatus = InputLockStatus.None;
 
         private void Awake() {
 
@@ -37,9 +44,19 @@ namespace KickDive.Hardware{
             }
         }
 
+        public void LockInput() {
+            _inputLockStatus = InputLockStatus.Locked;
+        }
+
+        public void UnlockInput() {
+            _inputLockStatus = InputLockStatus.Unlocked;
+        }
+
         private void Update() {
-            gameInput.GetPrimaryButtonStatus();
-            gameInput.GetSecondaryButtonStatus();
+            if (_inputLockStatus == InputLockStatus.Unlocked) {
+                gameInput.GetPrimaryButtonStatus();
+                gameInput.GetSecondaryButtonStatus();
+            }
         }
     }
 

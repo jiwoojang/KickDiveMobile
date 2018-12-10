@@ -4,6 +4,8 @@ TextureImporter:
   fileIDToRecycleName:
     21300000: HealthBarFull
     21300002: HealthBarEmpty
+    21300004: FightRed
+    21300006: FightYellow
   externalObjects: {}
   serializedVersion: 7
   mipmaps:
@@ -143,6 +145,46 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: 510e9f0a517463f48ac08a53e1f404ba
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FightRed
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 544
+        width: 95
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bb76ecfe81c96441aba6fd8a3bdf2ca
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FightYellow
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 512
+        width: 95
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 34bb8793028e17e46b698ac9c245659e
       vertices: []
       indices: 
       edges: []

@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using KickDive.Hardware;
 using Photon.Pun;
+using KickDive.Match;
+using Photon.Realtime;
 
 // A class used for debugging game properties/application level functionality 
 // Not meant to be included in the final game
-public class DebugGameManager : MonoBehaviour {
+public class DebugGameManager : MonoBehaviourPunCallbacks {
 
     private InputManager    _inputManager;
     private NetworkManager  _networkManager;
+
+    public bool roundStarted;
 
     public void Start() {
         if (InputManager.instance != null) {
@@ -56,7 +60,7 @@ public class DebugGameManager : MonoBehaviour {
     }
 
     private void OnConnectedToRoom(string roomName) {
-        _networkManager.InstantiatePlayerPrefab();
+        //_networkManager.InstantiatePlayerPrefab();
     }
 
     private void PrimaryButtonStartedHandler(HardwareInput sender) {
@@ -73,5 +77,9 @@ public class DebugGameManager : MonoBehaviour {
 
     private void SecondaryButtonEndedHandler(HardwareInput sender) {
         //Debug.Log("Secondary Button Ended");
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer) {
+        MatchManager.instance.RemoteInitializeRound();
     }
 }
