@@ -22,6 +22,7 @@ namespace KickDive.Match {
         WaitingToStartMatch,
         WaitingToStartRound,
         RoundInProgress,
+        RoundComplete,
         MatchComplete,
     }
 
@@ -65,7 +66,7 @@ namespace KickDive.Match {
         // Truncates the floating point remaning time
         public int          currentIntegerRoundTimeRemaning { get { return (int)_currentFloatingPointRoundTimeRemanining; } }
 
-        private float       _roundTimerStartDelay = 0;
+        private float       _roundTimerStartDelay = float.MaxValue;
         // Time left in this round in floating point precision
         private float       _currentFloatingPointRoundTimeRemanining = 30.0f;
 
@@ -113,13 +114,30 @@ namespace KickDive.Match {
             }
         }
 
+        public void ResetPlayerPrefab() {
+            if (NetworkManager.instance.PlayerPrefab != null) {
+                NetworkManager.instance.PlayerPrefab.transform.position = playerSpawn.position;
+                NetworkManager.instance.PlayerPrefab.transform.rotation = playerSpawn.rotation;
+            }
+        }
+
         // Matches 
         public void EndMatch() {
             matchStatus = MatchStatus.MatchComplete;
         }
 
         // Rounds
-        public void SetPlayerWonRound(PlayerNumber playerNumber) {
+        public void SetPlayerWonRound(PlayerNumber winningPlayer) {
+            // Player who owns the round win sends the round win RPC
+            if (NetworkManager.IsHost) {
+                photonView.RPC("HandlePlayerWonRound", RpcTarget.AllViaServer, NetworkManager.playerNumber);
+            }
+        }
+
+        [PunRPC]
+        public void HandlePlayerWonRound(PlayerNumber playerNumber) {
+            Debug.Log(playerNumber + " won the round!");
+
             PlayerNumber roundWinningPlayer = PlayerNumber.None;
             switch (playerNumber) {
                 case PlayerNumber.Player1: {
@@ -142,8 +160,8 @@ namespace KickDive.Match {
         }
 
         public void RemoteInitializeRound() {
-            if (matchStatus != MatchStatus.MatchComplete) {
-                photonView.RPC("InitializeRound", RpcTarget.All);
+            if (matchStatus == MatchStatus.RoundComplete || matchStatus == MatchStatus.WaitingToStartMatch) {
+                photonView.RPC("InitializeRound", RpcTarget.AllViaServer);
             }
         }
 
@@ -153,12 +171,12 @@ namespace KickDive.Match {
 
             // Player 1 will always request the timer to synchronize
             // TODO: Make this more flexible
-            if (NetworkManager.playerNumber == PlayerNumber.Player1) {
+            if (NetworkManager.IsHost) {
                 StartRoundTimerSynchronization();
             }
 
             // Restart player
-            NetworkManager.instance.InstantiatePlayerPrefab();
+            ResetPlayerPrefab();
         }
 
         public void StartRound() {
@@ -172,12 +190,9 @@ namespace KickDive.Match {
             // Lock input 
             InputManager.instance.LockInput();
 
-            // Tear down player
-            NetworkManager.instance.DestroyPlayerPrefab();
-
             // Reset timers
             _currentFloatingPointRoundTimeRemanining = 30.0f;
-            matchStatus = MatchStatus.WaitingToStartRound;
+            matchStatus = MatchStatus.RoundComplete;
 
             // Check if anyone has won the match 
             if ((player1RoundScore == scoreToWin) || (player2RoundScore == scoreToWin)) {
@@ -220,7 +235,6 @@ namespace KickDive.Match {
             // Find out how long ago this RPC was called from the other client
             // This should be about the same as RTT
             int RPCCallTime = PhotonNetwork.ServerTimestamp - serverTimeStamp;
-
             SetRoundTimerStartDelay(timerStartDelay - RPCCallTime);
         }
 
@@ -232,12 +246,12 @@ namespace KickDive.Match {
             switch (matchStatus) {
                 case MatchStatus.WaitingToStartRound: {
                     // Time sync
-                    if (_roundTimerStartDelay != 0) {
+                    if (_roundTimerStartDelay != float.MaxValue) {
                         _roundTimerStartDelay -= (Time.deltaTime * 1000);
 
                         if (_roundTimerStartDelay < 0) {
                             Debug.Log("Round Timer Synchronized!");
-                            _roundTimerStartDelay = 0;
+                            _roundTimerStartDelay = float.MaxValue;
                             UIManager.instance.StartRoundUI();
                         }
                     }

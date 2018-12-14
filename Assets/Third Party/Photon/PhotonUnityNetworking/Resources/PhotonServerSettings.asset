@@ -39,4 +39,5 @@ MonoBehaviour:
   - HandleRoundTimerStart
   - InitializeRound
   - HandleRoundTimerStartSynchronization
+  - HandlePlayerWonRound
   DisableAutoOpenWizard: 1

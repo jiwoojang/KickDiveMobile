@@ -49,7 +49,7 @@ namespace KickDive.Fighter {
             }
 
             // Set up win conditions
-            _colliderController.OnPlayerWonRound += OnPlayerWonRound;
+            _colliderController.OnPlayerWon += OnPlayerWonRound;
 
             // Set up animator controls
             _diveAnimatorHash = Animator.StringToHash("Dive");
@@ -158,19 +158,7 @@ namespace KickDive.Fighter {
         }
 
         public void OnPlayerWonRound() {
-            _photonView.RPC("HandleWonRound", RpcTarget.Others, NetworkManager.playerNumber);
-        }
-
-        [PunRPC]
-        public void HandleWonRound(PlayerNumber roundWinningPlayer) {
-            _photonView.RPC("HandleAcknowledgeWonRound", RpcTarget.AllViaServer, roundWinningPlayer);
-        }
-
-        [PunRPC]
-        public void HandleAcknowledgeWonRound(PlayerNumber roundWinningPlayer) {
-            Debug.Log(roundWinningPlayer + " won the round!");
-
-            MatchManager.instance.SetPlayerWonRound(roundWinningPlayer);
+            MatchManager.instance.SetPlayerWonRound(NetworkManager.playerNumber);
         }
 
         private void Update() {

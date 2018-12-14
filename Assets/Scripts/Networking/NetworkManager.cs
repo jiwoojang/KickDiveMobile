@@ -13,6 +13,9 @@ namespace Photon.Pun {
         public static NetworkManager instance;
         public static PlayerNumber playerNumber = PlayerNumber.None;
 
+        // Player number 1 is the first person to join the room so they are the host
+        public static bool IsHost { get { return playerNumber == PlayerNumber.Player1; } }
+
         // Public facing events for non-photon views to subscribe to 
         public delegate void ConnectedToPhotonMaster();
         public delegate void ConnectedToRoom(string roomName);
@@ -26,6 +29,8 @@ namespace Photon.Pun {
 
         public string player1RoomPropertyKey;
         public string player2RoomPropertyKey;
+
+        public GameObject PlayerPrefab { get; private set; }
 
         [SerializeField]
         private string  _playerPrefabName;
@@ -126,6 +131,8 @@ namespace Photon.Pun {
 
             MatchManager.instance.SetPlayerSpawn(playerNumber);
 
+            InstantiatePlayerPrefab();
+
             // Fire Event
             if (OnConnectedToRoom != null)
                 OnConnectedToRoom(PhotonNetwork.CurrentRoom.Name);
@@ -147,10 +154,14 @@ namespace Photon.Pun {
                 return;
             }
 
-            _playerPrefabPhotonView = PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation).GetComponent<PhotonView>();
-            _playerPrefabPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
             if (_playerPrefabPhotonView == null) {
-                Debug.LogError("Player prefab has no photon view! This is an error");
+                _playerPrefabPhotonView = PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation).GetComponent<PhotonView>();
+                _playerPrefabPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
+                PlayerPrefab = _playerPrefabPhotonView.gameObject;
+
+                if (_playerPrefabPhotonView == null) {
+                    Debug.LogError("Player prefab has no photon view! This is an error");
+                }
             }
         }
         
@@ -159,8 +170,9 @@ namespace Photon.Pun {
                 Debug.LogError("Cannot destroy player prefab, not connected to room. Bailing");
                 return;
             }
-
-            PhotonNetwork.Destroy(_playerPrefabPhotonView);
+            if (_playerPrefabPhotonView != null) {
+                PhotonNetwork.Destroy(_playerPrefabPhotonView);
+            }
         }
 
         private void Update() {
