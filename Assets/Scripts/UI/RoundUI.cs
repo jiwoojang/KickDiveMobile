@@ -11,6 +11,8 @@ namespace KickDive.UI {
         [SerializeField]
         private TextMeshProUGUI     _roundCounterText;
         [SerializeField]
+        private TextMeshProUGUI     _endOfMatchText;
+        [SerializeField]
         private Animator            _animator;
         [SerializeField]
         private float               _fadeSpeed = 10.0f;
@@ -47,6 +49,11 @@ namespace KickDive.UI {
         public void EndFightPopup() {
             MatchManager.instance.StartRound();
             _animator.ResetTrigger(_fightPopupStartHash);
+        }
+
+        public void EndMatch(string winningFighterName) {
+            _endOfMatchText.SetText(winningFighterName + " wins!");
+            _endOfMatchText.gameObject.SetActive(true);
         }
 
         void Update() {

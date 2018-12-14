@@ -28,13 +28,13 @@ namespace KickDive.UI {
         [SerializeField]
         private TextMeshProUGUI     _winsTextMesh;
 
-        private string              _playerFighterName;
+        public string               playerFighterName { get; private set; }
         private PlayerNumber        _playerNumber;
         private PlayerHealthState   _playerHealth = PlayerHealthState.Alive;
 
         // Sets all important properties for this UI bundle
         public void SetPlayerInfo(string fighterName, PlayerNumber playerNumber) {
-            _playerFighterName = fighterName;
+            playerFighterName = fighterName;
             _playerNumber = playerNumber;
 
             if (_playerNumber != PlayerNumber.None) {

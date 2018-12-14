@@ -37,6 +37,7 @@ namespace KickDive.UI {
 
             if (MatchManager.instance != null) {
                 MatchManager.instance.OnPlayerWonRound += PlayerWonRound;
+                MatchManager.instance.OnPlayerWonMatch += PlayerWonMatch;
             } else {
                 Debug.LogError("Could not find MatchManager to get match information for the UI!");
             }
@@ -58,6 +59,19 @@ namespace KickDive.UI {
                 case PlayerNumber.Player2: {
                     _player2UI.SetPlayerWins(MatchManager.instance.player2RoundScore);
                     _player1UI.DepleteHealth();
+                    break;
+                }
+            }
+        }
+
+        public void PlayerWonMatch(PlayerNumber playerNumber) {
+            switch (playerNumber) {
+                case PlayerNumber.Player1: {
+                    _roundUI.EndMatch(_player1UI.playerFighterName);
+                    break;
+                }
+                case PlayerNumber.Player2: {
+                    _roundUI.EndMatch(_player2UI.playerFighterName);
                     break;
                 }
             }
