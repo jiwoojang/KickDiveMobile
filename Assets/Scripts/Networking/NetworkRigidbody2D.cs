@@ -14,6 +14,7 @@ public class NetworkRigidbody2D : MonoBehaviour, IPunObservable {
         public double   timestamp;
     }
 
+    private float       _teleportThresholdDistance = 2.0f;
     private Rigidbody2D _rigidbody;
     private PhotonView  _photonView;
     private float       _recentTraveledDistance;
@@ -62,7 +63,7 @@ public class NetworkRigidbody2D : MonoBehaviour, IPunObservable {
             _recentTraveledAngle = Mathf.Abs(_rigidbody.rotation - _recentSnapshot.rotation);
 
             // Teleport for significant distances
-            if (Vector2.Distance(_rigidbody.position, _recentSnapshot.position) > (2.5f)) {
+            if (Vector2.Distance(_rigidbody.position, _recentSnapshot.position) > (_teleportThresholdDistance)) {
                 _rigidbody.position = _recentSnapshot.position;
             }
 

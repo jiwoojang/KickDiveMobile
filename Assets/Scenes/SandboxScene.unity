@@ -380,6 +380,7 @@ MonoBehaviour:
   _playerRightSpawn: {fileID: 1891517229}
   _playerLeftSpawn: {fileID: 1351792068}
   roundLength: 30
+  _cameraPositioner: {fileID: 476014997}
   playerSpawn: {fileID: 0}
   DiveDirection: {x: 0, y: 0}
   KickDirection: {x: 0, y: 0}
@@ -1015,6 +1016,7 @@ GameObject:
   m_Component:
   - component: {fileID: 476014995}
   - component: {fileID: 476014996}
+  - component: {fileID: 476014997}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -1047,6 +1049,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roundStarted: 0
+--- !u!114 &476014997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 476014994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19e4c28a1da5314980f5678391c64c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cameraZoomSpeed: 3
+  _cameraMovementSpeed: 3
+  _minimumOrthographicCameraSize: 0.8
+  _cameraZoomScale: 0.7
+  _playerLeftTransform: {fileID: 1351792068}
+  _playerRightTransform: {fileID: 1891517229}
 --- !u!1 &559766505
 GameObject:
   m_ObjectHideFlags: 0
@@ -2260,7 +2279,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
   orthographic: 1

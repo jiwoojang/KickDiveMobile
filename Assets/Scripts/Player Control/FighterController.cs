@@ -48,6 +48,11 @@ namespace KickDive.Fighter {
                 _colliderController.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
             }
 
+            // Register to the NetworkManager if this is the remote player's controller 
+            if (!_photonView.IsMine) {
+                NetworkManager.instance.SetOtherPlayerGameObject(gameObject);
+            }
+
             // Set up win conditions
             _colliderController.OnPlayerWon += OnPlayerWonRound;
 

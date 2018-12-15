@@ -49,6 +49,9 @@ namespace KickDive.Match {
         [SerializeField]
         private int roundLength = 30;
 
+        [SerializeField]
+        private CameraPositioner _cameraPositioner;
+
         [HideInInspector]
         public Transform    playerSpawn;
         public Vector2      DiveDirection;
@@ -64,7 +67,7 @@ namespace KickDive.Match {
 
         // Time left in this round in whole seconds
         // Truncates the floating point remaning time
-        public int          currentIntegerRoundTimeRemaning { get { return (int)_currentFloatingPointRoundTimeRemanining; } }
+        public int          currentIntegerRoundTimeRemaning { get { return Mathf.FloorToInt(_currentFloatingPointRoundTimeRemanining); } }
 
         private float       _roundTimerStartDelay = float.MaxValue;
         // Time left in this round in floating point precision
@@ -102,28 +105,29 @@ namespace KickDive.Match {
 
             switch (playerNumber) {
                 case PlayerNumber.Player1: {
-                        playerSpawn = _playerRightSpawn;
-                        KickDirection = new Vector2(-1.0f, -1.0f);
-                        break;
-                    }
+                    playerSpawn = _playerRightSpawn;
+                    KickDirection = new Vector2(-1.0f, -1.0f);
+                    break;
+                }
                 case PlayerNumber.Player2: {
-                        playerSpawn = _playerLeftSpawn;
-                        KickDirection = new Vector2(1.0f, -1.0f);
-                        break;
-                    }
+                    playerSpawn = _playerLeftSpawn;
+                    KickDirection = new Vector2(1.0f, -1.0f);
+                    break;
+                }
             }
         }
 
         public void ResetPlayerPrefab() {
-            if (NetworkManager.instance.PlayerPrefab != null) {
-                NetworkManager.instance.PlayerPrefab.transform.position = playerSpawn.position;
-                NetworkManager.instance.PlayerPrefab.transform.rotation = playerSpawn.rotation;
+            if (NetworkManager.instance.playerGameObject != null) {
+                NetworkManager.instance.playerGameObject.transform.position = playerSpawn.position;
+                NetworkManager.instance.playerGameObject.transform.rotation = playerSpawn.rotation;
             }
         }
 
         // Matches 
         public void EndMatch() {
             matchStatus = MatchStatus.MatchComplete;
+            _cameraPositioner.DisableCameraPositioning();
         }
 
         // Rounds
@@ -180,6 +184,11 @@ namespace KickDive.Match {
         }
 
         public void StartRound() {
+            // Set up cameras if needed
+            if (!_cameraPositioner.shouldPosition) {
+                _cameraPositioner.InitializePlayers();
+            }
+
             // Unlock input
             InputManager.instance.UnlockInput();
 
