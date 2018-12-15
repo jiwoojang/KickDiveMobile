@@ -16,6 +16,8 @@ public class NetworkRigidbody2D : MonoBehaviour, IPunObservable {
 
     private Rigidbody2D _rigidbody;
     private PhotonView  _photonView;
+    private float       _recentTraveledDistance;
+    private float       _recentTraveledAngle;
 
     // Caches the most recently sent network snapshot
     // TODO: Cache network snapshots in a ring buffer and interpolate across a wider window.
@@ -44,6 +46,9 @@ public class NetworkRigidbody2D : MonoBehaviour, IPunObservable {
             stream.SendNext(info.timestamp);
         }
         else {
+
+            float trasmissionTime = Mathf.Abs((float)(PhotonNetwork.Time - info.timestamp));
+
             _recentSnapshot.position = (Vector2)stream.ReceiveNext();
             _recentSnapshot.rotation = (float)stream.ReceiveNext();
 
@@ -52,21 +57,33 @@ public class NetworkRigidbody2D : MonoBehaviour, IPunObservable {
 
             _recentSnapshot.timestamp = (double)stream.ReceiveNext();
 
+            // Cache the distance traveled this frame
+            _recentTraveledDistance = Vector2.Distance(_rigidbody.position, _recentSnapshot.position);
+            _recentTraveledAngle = Mathf.Abs(_rigidbody.rotation - _recentSnapshot.rotation);
+
+            // Teleport for significant distances
+            if (Vector2.Distance(_rigidbody.position, _recentSnapshot.position) > (2.5f)) {
+                _rigidbody.position = _recentSnapshot.position;
+            }
+
             // Update rigidbody with most recent values
             _rigidbody.velocity = _recentSnapshot.velocity;
             _rigidbody.angularVelocity = _recentSnapshot.angularVelocity;
+
+            // Interpolate position
+            // This assumes velocity is constant until new velocity values are recieved from owner
+
+            // d = v * t
+            _recentSnapshot.position += _recentSnapshot.velocity * trasmissionTime;
+            _recentSnapshot.rotation += _recentSnapshot.angularVelocity * trasmissionTime;
         }
     }
 
     private void FixedUpdate() {
         // Synchronize other client positions
         if (!_photonView.IsMine) {
-            // This assumes velocity is constant until new velocity values are recieved from owner
-
-            // d = v * t
-            // t here is the time between this physics calculation and the last one, aka time between FixedUpdate calls.
-            _rigidbody.position = Vector2.Lerp(_rigidbody.position, _recentSnapshot.position, _recentSnapshot.velocity.magnitude * Time.fixedDeltaTime);
-            _rigidbody.rotation = Mathf.Lerp(_rigidbody.rotation, _recentSnapshot.rotation, _recentSnapshot.angularVelocity * Time.fixedDeltaTime);
+            _rigidbody.position = Vector2.MoveTowards(_rigidbody.position, _recentSnapshot.position, (_recentTraveledDistance / PhotonNetwork.SerializationRate));
+            _rigidbody.rotation = Mathf.MoveTowards(_rigidbody.rotation, _recentSnapshot.rotation, (_recentTraveledAngle/ PhotonNetwork.SerializationRate));
         }
     }
 }

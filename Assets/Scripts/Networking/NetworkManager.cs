@@ -181,10 +181,14 @@ namespace Photon.Pun {
                 Hashtable playerCustomProperties = PhotonNetwork.LocalPlayer.CustomProperties;
 
                 // If ping changed, update it
-                if (PhotonNetwork.GetPing() != (int)playerCustomProperties["Ping"]) {
-                    playerCustomProperties["Ping"] = PhotonNetwork.GetPing();
+                object otherPlayerPing = playerCustomProperties["Ping"];
 
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                if (otherPlayerPing != null) {
+                    if (PhotonNetwork.GetPing() != (int)otherPlayerPing) {
+                        playerCustomProperties["Ping"] = PhotonNetwork.GetPing();
+
+                        PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+                    }
                 }
             }
         }
