@@ -2766,7 +2766,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9419546e3dc25d6459e84444948ff604, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 400
+  jumpForce: 600
   kickForce: 150
   kickDirectionVector: {x: 1, y: -1}
   _animator: {fileID: 95240839201513796}

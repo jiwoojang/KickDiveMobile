@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using KickDive.UI;
 using KickDive.Hardware;
+using KickDive.Fighter;
 
 // A class that handles all match specific work
 // This may include per-round management
@@ -36,6 +37,9 @@ namespace KickDive.Match {
 
         public event PlayerWonRound OnPlayerWonRound;
         public event PlayerWonMatch OnPlayerWonMatch;
+
+        public GameObject playerGameObject { get; private set; }
+        public GameObject otherPlayerGameObject { get; private set; }
 
         // Player 1 spawn
         [SerializeField]
@@ -117,10 +121,21 @@ namespace KickDive.Match {
             }
         }
 
+        public void SetOtherPlayerGameObject(GameObject playerObject) {
+            otherPlayerGameObject = playerObject;
+        }
+
+        public void SetPlayerGameObject(GameObject playerObject) {
+            playerGameObject = playerObject;
+        }
+
         public void ResetPlayerPrefab() {
-            if (NetworkManager.instance.playerGameObject != null) {
-                NetworkManager.instance.playerGameObject.transform.position = playerSpawn.position;
-                NetworkManager.instance.playerGameObject.transform.rotation = playerSpawn.rotation;
+            if (playerGameObject != null) {
+                playerGameObject.transform.position = playerSpawn.position;
+                playerGameObject.transform.rotation = playerSpawn.rotation;
+
+                playerGameObject.GetComponent<FighterController>().ResetPlayerModel();
+                otherPlayerGameObject.GetComponent<FighterController>().ResetPlayerModel();
             }
         }
 

@@ -30,9 +30,6 @@ namespace Photon.Pun {
         public string player1RoomPropertyKey;
         public string player2RoomPropertyKey;
 
-        public GameObject playerGameObject      { get; private set; }
-        public GameObject otherPlayerGameObject { get; private set; }
-
         [SerializeField]
         private string  _playerPrefabName;
         private string  _gameVersion = "1.0";
@@ -149,10 +146,6 @@ namespace Photon.Pun {
             MatchManager.instance.EndRound();
         }
 
-        public void SetOtherPlayerGameObject(GameObject playerObject) {
-            otherPlayerGameObject = playerObject;
-        }
-
         public void InstantiatePlayerPrefab() {
             if (PhotonNetwork.CurrentRoom == null) {
                 Debug.LogError("Cannot instantiate player prefab, not connected to room. Bailing");
@@ -163,7 +156,7 @@ namespace Photon.Pun {
                 _playerPrefabPhotonView = PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation).GetComponent<PhotonView>();
                 _playerPrefabPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
 
-                playerGameObject = _playerPrefabPhotonView.gameObject;
+                MatchManager.instance.SetPlayerGameObject(_playerPrefabPhotonView.gameObject);
 
                 if (_playerPrefabPhotonView == null) {
                     Debug.LogError("Player prefab has no photon view! This is an error");

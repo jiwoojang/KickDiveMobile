@@ -41,8 +41,8 @@ namespace KickDive.Match {
         }
 
         public void InitializePlayers() {
-            GameObject playerGameObject = NetworkManager.instance.playerGameObject;
-            GameObject remotePlayerGameObject = NetworkManager.instance.otherPlayerGameObject;
+            GameObject playerGameObject = MatchManager.instance.playerGameObject;
+            GameObject remotePlayerGameObject = MatchManager.instance.otherPlayerGameObject;
 
             if ((playerGameObject != null) && (remotePlayerGameObject != null)) {
                 _localPlayerTransform = playerGameObject.transform;

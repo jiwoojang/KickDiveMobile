@@ -31,6 +31,7 @@ namespace KickDive.Fighter {
         private int             _kickAnimatorHash;
         private int             _idleAnimatorHash;
         private PhotonView      _photonView;
+        private bool            _isPlayerModelFlipped;
 
         private void Awake() {
             _rigidbody2D = GetComponent<Rigidbody2D>();
@@ -50,7 +51,7 @@ namespace KickDive.Fighter {
 
             // Register to the NetworkManager if this is the remote player's controller 
             if (!_photonView.IsMine) {
-                NetworkManager.instance.SetOtherPlayerGameObject(gameObject);
+                MatchManager.instance.SetOtherPlayerGameObject(gameObject);
             }
 
             // Set up win conditions
@@ -131,6 +132,50 @@ namespace KickDive.Fighter {
             _photonView.RPC("HandleStartKick", RpcTarget.AllViaServer);
         }
 
+        private bool ShouldFlipPlayerModel() {
+            // If this player is already flipped, we do the inverse of the calculations we would normally do
+            float modifier = _isPlayerModelFlipped ? -1.0f : 1.0f;
+
+            switch (NetworkManager.playerNumber) {
+                // Player 1 should always be on the right, player 2 should always be on the left
+                // Inverse for if they players are already switched
+                case PlayerNumber.Player1:  {
+                    if (_photonView.IsMine) {
+                        return (modifier * gameObject.transform.position.x) < (modifier * MatchManager.instance.otherPlayerGameObject.transform.position.x);
+                    } else {
+                        return (modifier * gameObject.transform.position.x) > (modifier * MatchManager.instance.playerGameObject.transform.position.x);
+                    }
+                }
+                case PlayerNumber.Player2: {
+                    if (_photonView.IsMine) {
+                        return (modifier * gameObject.transform.position.x) > (modifier * MatchManager.instance.otherPlayerGameObject.transform.position.x);
+                    } else {
+                        return (modifier * gameObject.transform.position.x) < (modifier * MatchManager.instance.playerGameObject.transform.position.x);
+                    }
+                }
+                // If you are here this is an error
+                default: {
+                    Debug.LogError("Missing player numbers for determining model orientation");
+                    return false;
+                }
+            }
+        }
+
+        public void FlipPlayerModel() {
+            // Fancy little XOR for the flag
+            _isPlayerModelFlipped ^= true;
+
+            _animator.transform.localScale = new Vector3(-1.0f * _animator.transform.localScale.x, _animator.transform.localScale.y, _animator.transform.localScale.z);
+            _colliderController.transform.localScale = new Vector3(-1.0f * _colliderController.transform.localScale.x, _colliderController.transform.localScale.y, _colliderController.transform.localScale.z);
+            _normalizedKickDirectionVector = new Vector2(-1.0f * _normalizedKickDirectionVector.x, _normalizedKickDirectionVector.y);
+        }
+
+        public void ResetPlayerModel() {
+            if (_isPlayerModelFlipped) {
+                FlipPlayerModel();
+            }
+        }
+
         private void OnCollisionEnter2D(Collision2D collision) {
             if (collision.enabled) {
                 isGrounded = true;
@@ -148,6 +193,11 @@ namespace KickDive.Fighter {
                     _rigidbody2D.velocity = Vector2.zero;
                     _rigidbody2D.angularVelocity = 0f;
                     _rigidbody2D.Sleep();
+                }
+
+                if (ShouldFlipPlayerModel()) {
+                    MatchManager.instance.playerGameObject.GetComponent<FighterController>().FlipPlayerModel();
+                    MatchManager.instance.otherPlayerGameObject.GetComponent<FighterController>().FlipPlayerModel();
                 }
             }
         }
