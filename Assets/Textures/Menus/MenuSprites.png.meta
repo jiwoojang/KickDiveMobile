@@ -6,6 +6,7 @@ TextureImporter:
     21300002: HealthBarEmpty
     21300004: FightRed
     21300006: FightYellow
+    21300008: Background
   externalObjects: {}
   serializedVersion: 7
   mipmaps:
@@ -158,7 +159,7 @@ TextureImporter:
         width: 95
         height: 29
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -178,13 +179,33 @@ TextureImporter:
         width: 95
         height: 29
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
       spriteID: 34bb8793028e17e46b698ac9c245659e
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Background
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 65
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be820bd223c5fa24cbee7af7fda1fc0b
       vertices: []
       indices: 
       edges: []
