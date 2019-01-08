@@ -55,7 +55,7 @@ public class DebugGameManager : MonoBehaviourPunCallbacks {
         }
     }
 
-    private void OnConnectedToMaster() {
+    public override void OnConnectedToMaster() {
         _networkManager.JoinOrCreateRoom("DebugRoom");
     }
 

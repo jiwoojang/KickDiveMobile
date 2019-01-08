@@ -34,10 +34,6 @@ namespace Photon.Pun {
         private string  _playerPrefabName;
         private string  _gameVersion = "1.0";
 
-        // The time between sending the RPC to start the timer and when the timer should start on both clients
-        // This should be a time in milliseconds
-        private int     _roundTimerStartDelay;
-
         private PhotonView _playerPrefabPhotonView;
 
         public override void OnEnable() {
@@ -51,13 +47,18 @@ namespace Photon.Pun {
         }
 
         private void Awake() {
+            // This manager will be needed at both the main menu and inside the game
+            DontDestroyOnLoad(gameObject);
+
             if (instance == null) {
                 instance = this;
             } else if (instance != this) {
                 Debug.Log("Found an existing instance of the NetworkManager, destroying this one");
                 DestroyImmediate(this);
             }
+        }
 
+        public void ConnectToMaster() {
             // Set the game version 
             PhotonNetwork.GameVersion = _gameVersion;
 
