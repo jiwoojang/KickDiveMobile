@@ -34,6 +34,9 @@ namespace KickDive.UI {
             _loadingCircle.StarLoading();
 
             _networkManagerInstance.ConnectToMaster();
+
+            // Start the timeout coroutine
+            StartCoroutine(PhotonMasterConnectionTimer());
         }
 
         public void OnConnectedToMaster() {

@@ -7,6 +7,11 @@ TextureImporter:
     21300004: FightRed
     21300006: FightYellow
     21300008: Background
+    21300010: JoinScreen
+    21300012: JoinButton
+    21300014: MenuSprites_0
+    21300016: JoinScreen2
+    21300018: RoomNameScreen
   externalObjects: {}
   serializedVersion: 7
   mipmaps:
@@ -199,13 +204,113 @@ TextureImporter:
         width: 256
         height: 224
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
       spriteID: be820bd223c5fa24cbee7af7fda1fc0b
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoinScreen
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 553
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01d92b180bacafa48a7c7920922f0d5d
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoinButton
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 413
+        width: 60
+        height: 60
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 094ff2dac701e71459cf53bdea652421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MenuSprites_0
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 797
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 969680d97c4955b4b86c6798931f0a6f
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: JoinScreen2
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 797
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a54bd3365d8135c41aa02d7a8be42d17
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RoomNameScreen
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 309
+        width: 256
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fe0c849ddafed0c43929e7acaefac55f
       vertices: []
       indices: 
       edges: []
