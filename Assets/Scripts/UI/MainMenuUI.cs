@@ -11,6 +11,10 @@ namespace KickDive.UI {
         [SerializeField]
         private LoadingCircle _loadingCircle;
 
+        private void OnEnable() {
+            ResetMenu();
+        }
+
         public void StartGame() {
             // Disable the button
             _playButton.SetActive(false);
@@ -26,7 +30,11 @@ namespace KickDive.UI {
         }
 
         public void ConnectFailed() {
-            // Reset all buttons and log an error
+            // Reset all buttons
+            ResetMenu();
+        }
+
+        public void ResetMenu() {
             _loadingCircle.StopLoading();
             _loadingCircle.gameObject.SetActive(false);
 

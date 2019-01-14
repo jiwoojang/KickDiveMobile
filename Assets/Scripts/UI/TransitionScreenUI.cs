@@ -91,7 +91,7 @@ namespace KickDive.UI {
                 case TransitionState.FadeOut: {
                     _image.color = Color.Lerp(_image.color, new Color(0, 0, 0, 0), _fadeSpeed * Time.deltaTime);
 
-                    if (_image.color.a < 0.01f) {
+                    if (_image.color.a < 0.1f) {
                         // Handler for complete transition
                         FadeOutComplete();
                     }
@@ -101,7 +101,7 @@ namespace KickDive.UI {
                 case TransitionState.FadeIn: {
                     _image.color = Color.Lerp(_image.color, new Color(0, 0, 0, 1), _fadeSpeed * Time.deltaTime);
 
-                    if (_image.color.a > 0.99f) {
+                    if (_image.color.a > 0.9f) {
                         // Handler for complete transition
                         FadeInComplete();
                     }

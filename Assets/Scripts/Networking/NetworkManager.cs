@@ -59,19 +59,19 @@ namespace Photon.Pun {
         }
 
         public void ConnectToMaster() {
-            // Set the game version 
-            PhotonNetwork.GameVersion = _gameVersion;
-
             if (!PhotonNetwork.IsConnected) {
+                // Set the game version 
+                PhotonNetwork.GameVersion = _gameVersion;
+
                 PhotonNetwork.ConnectUsingSettings();
                 PhotonNetwork.SerializationRate = 20;
                 PhotonNetwork.SendRate = 30;
+
+                isConnectedToMaster = false;
+                isConnectedToRoom = false;
             } else {
                 Debug.Log("Network Manager is attempting to initialize while already connected");
             }
-
-            isConnectedToMaster = false;
-            isConnectedToRoom = false;
         }
 
         public override void OnConnectedToMaster() {
@@ -128,9 +128,10 @@ namespace Photon.Pun {
 
             Debug.Log("Joined as Player Number: " + playerNumber);
 
-            MatchManager.instance.SetPlayerSpawn(playerNumber);
+            // TODO: Move these to a new initialization method once network connection between scenes is working
+            //MatchManager.instance.SetPlayerSpawn(playerNumber);
 
-            InstantiatePlayerPrefab();
+            //InstantiatePlayerPrefab();
 
             // Fire Event
             if (OnConnectedToRoom != null)
