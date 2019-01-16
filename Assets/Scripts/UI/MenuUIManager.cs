@@ -7,8 +7,8 @@ using TMPro;
 namespace KickDive.UI {
     public class MenuUIManager : MonoBehaviour {
 
-        private enum JoinHostState {
-            None, 
+        public enum JoinHostState {
+            None,
             Join,
             Host
         }
@@ -31,8 +31,9 @@ namespace KickDive.UI {
         private TextMeshProUGUI _joinHostButtonText;
 
         private NetworkManager      _networkManagerInstance;
-        private JoinHostState       _joinHostState;
         private string              _roomName;
+
+        public JoinHostState        joinHostState { get; private set; }
 
         private void Awake() {
             if (NetworkManager.instance != null) {
@@ -43,6 +44,7 @@ namespace KickDive.UI {
             }
 
             _networkManagerInstance.OnConnectedToPhotonMaster += OnConnectedToMaster;
+            _networkManagerInstance.OnConnectedToRoom += OnConnectedToRoom;
         }
 
         public void ConnectToMaster() {
@@ -84,13 +86,13 @@ namespace KickDive.UI {
         }
 
         public void JoinRoom() {
-            _joinHostState = JoinHostState.Join;
+            joinHostState = JoinHostState.Join;
             TransitionToRoomName();
             _joinHostButtonText.SetText("JOIN");
         }
 
         public void HostRoom() {
-            _joinHostState = JoinHostState.Host;
+            joinHostState = JoinHostState.Host;
             TransitionToRoomName();
             _joinHostButtonText.SetText("HOST");
         }
@@ -100,6 +102,19 @@ namespace KickDive.UI {
                 _networkManagerInstance.JoinOrCreateRoom(_roomName);
             } else {
                 Debug.LogError("Invalid room name was chosen");
+            }
+        }
+
+        public void LeaveRoom() {
+            _networkManagerInstance.LeaveRoom();
+            _roomName = null;
+        }
+
+        // TODO: Handle the case where the host disconnects but the client remains AFTER client joins the host
+        public void OnConnectedToRoom(string roomName) {
+            if (PhotonNetwork.CurrentRoom.PlayerCount > 1) {
+                // Both players are here, lets start the game!
+                _networkManagerInstance.RaiseStartGameEvent();
             }
         }
 
@@ -120,7 +135,7 @@ namespace KickDive.UI {
         }
 
         public void ResetJoinHostData() {
-            _joinHostState = JoinHostState.None;
+            joinHostState = JoinHostState.None;
             _roomName = null;
         }
     }

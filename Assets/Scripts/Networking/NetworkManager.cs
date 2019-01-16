@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using KickDive.Match;
 using Photon.Realtime;
+using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 // All things at the game-level related to network live here
 // Accessible as a singleton
 namespace Photon.Pun {
-    public class NetworkManager : MonoBehaviourPunCallbacks {
+    public class NetworkManager : MonoBehaviourPunCallbacks, IOnEventCallback {
 
         public static NetworkManager instance;
         public static PlayerNumber playerNumber = PlayerNumber.None;
@@ -33,8 +34,10 @@ namespace Photon.Pun {
         [SerializeField]
         private string  _playerPrefabName;
         private string  _gameVersion = "1.0";
+        private readonly byte startGameEventCode = 0;
 
         private PhotonView _playerPrefabPhotonView;
+        private MatchManager _matchManagerInstace;
 
         public override void OnEnable() {
             // Register the manager as a callback reciever
@@ -75,9 +78,6 @@ namespace Photon.Pun {
         }
 
         public override void OnConnectedToMaster() {
-            Debug.Log("Connected to Photon master server");
-            isConnectedToMaster = true;
-
             // Set custom some player properties before joining room
             Hashtable playerProperties = new Hashtable();
             playerProperties["Ping"] = PhotonNetwork.GetPing();
@@ -85,8 +85,12 @@ namespace Photon.Pun {
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
 
             // Fire Event 
-            if (OnConnectedToPhotonMaster != null)
+            if (OnConnectedToPhotonMaster != null && !isConnectedToMaster) {
                 OnConnectedToPhotonMaster();
+
+                Debug.Log("Connected to Photon master server");
+                isConnectedToMaster = true;
+            }
         }
 
         // Joining a room
@@ -95,6 +99,10 @@ namespace Photon.Pun {
             roomOptions.IsVisible = false;
             roomOptions.MaxPlayers = 2;
             PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
+        }
+
+        public void LeaveRoom() {
+            PhotonNetwork.LeaveRoom();
         }
 
         public override void OnJoinRoomFailed(short returnCode, string message) {
@@ -129,7 +137,7 @@ namespace Photon.Pun {
             Debug.Log("Joined as Player Number: " + playerNumber);
 
             // TODO: Move these to a new initialization method once network connection between scenes is working
-            //MatchManager.instance.SetPlayerSpawn(playerNumber);
+            //_matchManagerInstace.SetPlayerSpawn(playerNumber);
 
             //InstantiatePlayerPrefab();
 
@@ -144,8 +152,24 @@ namespace Photon.Pun {
             Debug.Log("Other player has disconnected! Shutting down match");
             
             // Teardown
-            MatchManager.instance.EndMatch();
-            MatchManager.instance.EndRound();
+            if (_matchManagerInstace != null) {
+                _matchManagerInstace.EndMatch();
+                _matchManagerInstace.EndRound();
+            }
+        }
+
+        public void RaiseStartGameEvent() {
+            RaiseEventOptions eventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+            SendOptions sendOptions = new SendOptions { Reliability = true };
+            PhotonNetwork.RaiseEvent(startGameEventCode, null, eventOptions, sendOptions);
+        }
+
+        // Event handler for PHOTON events only!
+        public void OnEvent(EventData photonEvent) {
+            // Load the game scene
+            if (photonEvent.Code == 0) {
+                Debug.Log("Photon start game event recieved!");
+            }
         }
 
         public void InstantiatePlayerPrefab() {
@@ -154,11 +178,11 @@ namespace Photon.Pun {
                 return;
             }
 
-            if (_playerPrefabPhotonView == null) {
-                _playerPrefabPhotonView = PhotonNetwork.Instantiate(_playerPrefabName, MatchManager.instance.playerSpawn.position, MatchManager.instance.playerSpawn.rotation).GetComponent<PhotonView>();
+            if (_playerPrefabPhotonView == null && _matchManagerInstace != null) {
+                _playerPrefabPhotonView = PhotonNetwork.Instantiate(_playerPrefabName, _matchManagerInstace.playerSpawn.position, _matchManagerInstace.playerSpawn.rotation).GetComponent<PhotonView>();
                 _playerPrefabPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
 
-                MatchManager.instance.SetPlayerGameObject(_playerPrefabPhotonView.gameObject);
+                _matchManagerInstace.SetPlayerGameObject(_playerPrefabPhotonView.gameObject);
 
                 if (_playerPrefabPhotonView == null) {
                     Debug.LogError("Player prefab has no photon view! This is an error");

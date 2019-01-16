@@ -21,7 +21,7 @@ namespace KickDive.UI {
 
             // Turn on the loading circle and start the load
             _loadingCircle.gameObject.SetActive(true);
-            _loadingCircle.StarLoading();
+            _loadingCircle.StartLoading();
         }
 
         public void ConnectSuccessful() {

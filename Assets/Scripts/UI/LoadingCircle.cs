@@ -17,7 +17,7 @@ namespace KickDive.UI {
         private RectTransform   _rectComponent;
         public bool             _isLoading      { get; private set; }
 
-        public void StarLoading() {
+        public void StartLoading() {
             _isLoading = true;
         }
 
