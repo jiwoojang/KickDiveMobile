@@ -242,15 +242,21 @@ namespace KickDive.Match {
                 // There should only be one other player in this list
                 // Ping in this situation is RTT
                 // Note this value could overflow to negative
-                int otherPlayerPing = (int)PhotonNetwork.PlayerListOthers[0].CustomProperties["Ping"];
-                int thisPlayerPing = PhotonNetwork.GetPing();
 
-                // Whichever player has the higher ping, use their ping as the delay to start the timer
-                int delayPing = (otherPlayerPing > thisPlayerPing) ? otherPlayerPing : thisPlayerPing;
+                // Cache value for validation
+                Photon.Realtime.Player[] otherPlayerList = PhotonNetwork.PlayerListOthers;
 
-                // Note there may be discrepancy if the ping of the other client changes significantly within the time to recieve this RPC
-                // Buffer this by double so that the client with the highest ping will not have to start the timer right away
-                photonView.RPC("HandleRoundTimerStartSynchronization", RpcTarget.AllViaServer, PhotonNetwork.ServerTimestamp, 2 * delayPing);
+                if (otherPlayerList.Length > 0) {
+                    int otherPlayerPing = (int)otherPlayerList[0].CustomProperties["Ping"];
+                    int thisPlayerPing = PhotonNetwork.GetPing();
+
+                    // Whichever player has the higher ping, use their ping as the delay to start the timer
+                    int delayPing = (otherPlayerPing > thisPlayerPing) ? otherPlayerPing : thisPlayerPing;
+
+                    // Note there may be discrepancy if the ping of the other client changes significantly within the time to recieve this RPC
+                    // Buffer this by double so that the client with the highest ping will not have to start the timer right away
+                    photonView.RPC("HandleRoundTimerStartSynchronization", RpcTarget.AllViaServer, PhotonNetwork.ServerTimestamp, 2 * delayPing);
+                }
             }
         }
 

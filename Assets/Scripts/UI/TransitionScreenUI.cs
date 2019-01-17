@@ -18,7 +18,7 @@ namespace KickDive.UI {
             FadeOut,
             FadeIn
         }
-
+        
         [SerializeField]
         private Image _image;
 
@@ -62,11 +62,9 @@ namespace KickDive.UI {
                 case MenuStages.RoomName: {
                     return _roomName;
                 }
+                default:
+                    return null;
             }
-
-            // Return some empty value
-            Debug.LogError("Could not return a GameObject for provided MenuStage");
-            return null;
         }
 
         // Transition FROM black
@@ -76,12 +74,18 @@ namespace KickDive.UI {
 
         // Transition TO Black
         private void FadeInComplete() {
-            GetStageGameObject(_currentStage).SetActive(false);
-            GetStageGameObject(_nextStage).SetActive(true);
 
-            // Update stage states
-            _currentStage = _nextStage;
-            _nextStage = MenuStages.None;
+            GameObject currentStageGameObject = GetStageGameObject(_currentStage);
+            GameObject nextStageGameObject = GetStageGameObject(_nextStage);
+
+            if (currentStageGameObject != null && nextStageGameObject != null) {
+                currentStageGameObject.SetActive(false);
+                nextStageGameObject.SetActive(true);
+
+                // Update stage states
+                _currentStage = _nextStage;
+                _nextStage = MenuStages.None;
+            }
 
             _state = TransitionState.FadeOut;
         }

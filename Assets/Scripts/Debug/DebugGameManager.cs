@@ -24,62 +24,62 @@ public class DebugGameManager : MonoBehaviourPunCallbacks {
             _networkManager = NetworkManager.instance;
         }
 
-        if (_inputManager != null) {
-            // Subscribe to input events
-            _inputManager.gameInput.OnPrimaryButtonStarted += PrimaryButtonStartedHandler;
-            _inputManager.gameInput.OnPrimaryButtonEnded += PrimaryButtonEndedHandler;
-            _inputManager.gameInput.OnSecondaryButtonStarted += SecondaryButtonStartedHandler;
-            _inputManager.gameInput.OnSecondaryButtonEnded += SecondaryButtonEndedHandler;
-        } else {
-            Debug.LogError("Attempting to subscribe to input manager when it does not exist");
-        }
+        //if (_inputManager != null) {
+        //    // Subscribe to input events
+        //    _inputManager.gameInput.OnPrimaryButtonStarted += PrimaryButtonStartedHandler;
+        //    _inputManager.gameInput.OnPrimaryButtonEnded += PrimaryButtonEndedHandler;
+        //    _inputManager.gameInput.OnSecondaryButtonStarted += SecondaryButtonStartedHandler;
+        //    _inputManager.gameInput.OnSecondaryButtonEnded += SecondaryButtonEndedHandler;
+        //} else {
+        //    Debug.LogError("Attempting to subscribe to input manager when it does not exist");
+        //}
 
-        if (_networkManager != null) {
-            _networkManager.OnConnectedToPhotonMaster += OnConnectedToMaster;
-            _networkManager.OnConnectedToRoom += OnConnectedToRoom;
-        }
+        //if (_networkManager != null) {
+        //    _networkManager.OnConnectedToPhotonMaster += OnConnectedToMaster;
+        //    _networkManager.OnConnectedToRoom += OnConnectedToRoom;
+        //}
     }
 
-    public void OnDisable() {
-        if (_inputManager != null) {
-            // Unsubscribe from input events
-            _inputManager.gameInput.OnPrimaryButtonStarted -= PrimaryButtonStartedHandler;
-            _inputManager.gameInput.OnPrimaryButtonEnded -= PrimaryButtonEndedHandler;
-            _inputManager.gameInput.OnSecondaryButtonStarted -= SecondaryButtonStartedHandler;
-            _inputManager.gameInput.OnSecondaryButtonEnded -= SecondaryButtonEndedHandler;
-        }
+    //public void OnDisable() {
+    //    if (_inputManager != null) {
+    //        // Unsubscribe from input events
+    //        _inputManager.gameInput.OnPrimaryButtonStarted -= PrimaryButtonStartedHandler;
+    //        _inputManager.gameInput.OnPrimaryButtonEnded -= PrimaryButtonEndedHandler;
+    //        _inputManager.gameInput.OnSecondaryButtonStarted -= SecondaryButtonStartedHandler;
+    //        _inputManager.gameInput.OnSecondaryButtonEnded -= SecondaryButtonEndedHandler;
+    //    }
 
-        if (_networkManager != null) {
-            _networkManager.OnConnectedToPhotonMaster -= OnConnectedToMaster;
-            _networkManager.OnConnectedToRoom -= OnConnectedToRoom;
-        }
-    }
+    //    if (_networkManager != null) {
+    //        _networkManager.OnConnectedToPhotonMaster -= OnConnectedToMaster;
+    //        _networkManager.OnConnectedToRoom -= OnConnectedToRoom;
+    //    }
+    //}
 
-    public override void OnConnectedToMaster() {
-        _networkManager.JoinOrCreateRoom("DebugRoom");
-    }
+    //public override void OnConnectedToMaster() {
+    //    _networkManager.JoinOrCreateRoom("DebugRoom");
+    //}
 
-    private void OnConnectedToRoom(string roomName) {
-        //_networkManager.InstantiatePlayerPrefab();
-    }
+    //private void OnConnectedToRoom(string roomName) {
+    //    //_networkManager.InstantiatePlayerPrefab();
+    //}
 
-    private void PrimaryButtonStartedHandler(HardwareInput sender) {
-        //Debug.Log("Primary Button Started");
-    }
+    //private void PrimaryButtonStartedHandler(HardwareInput sender) {
+    //    //Debug.Log("Primary Button Started");
+    //}
 
-    private void PrimaryButtonEndedHandler(HardwareInput sender) {
-        //Debug.Log("Primary Button Ended");
-    }
+    //private void PrimaryButtonEndedHandler(HardwareInput sender) {
+    //    //Debug.Log("Primary Button Ended");
+    //}
 
-    private void SecondaryButtonStartedHandler(HardwareInput sender) {
-        //Debug.Log("Secondary Button Started");
-    }
+    //private void SecondaryButtonStartedHandler(HardwareInput sender) {
+    //    //Debug.Log("Secondary Button Started");
+    //}
 
-    private void SecondaryButtonEndedHandler(HardwareInput sender) {
-        //Debug.Log("Secondary Button Ended");
-    }
+    //private void SecondaryButtonEndedHandler(HardwareInput sender) {
+    //    //Debug.Log("Secondary Button Ended");
+    //}
 
-    public override void OnPlayerEnteredRoom(Player newPlayer) {
-        MatchManager.instance.RemoteInitializeRound();
-    }
+    //public override void OnPlayerEnteredRoom(Player newPlayer) {
+    //    MatchManager.instance.RemoteInitializeRound();
+    //}
 }

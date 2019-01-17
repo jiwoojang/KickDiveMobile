@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using KickDive.Match;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
@@ -10,6 +11,12 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 // Accessible as a singleton
 namespace Photon.Pun {
     public class NetworkManager : MonoBehaviourPunCallbacks, IOnEventCallback {
+
+        private enum NetworkManagerState {
+            None, 
+            InMenu, 
+            InGame
+        }
 
         public static NetworkManager instance;
         public static PlayerNumber playerNumber = PlayerNumber.None;
@@ -35,18 +42,25 @@ namespace Photon.Pun {
         private string  _playerPrefabName;
         private string  _gameVersion = "1.0";
         private readonly byte startGameEventCode = 0;
+        private NetworkManagerState _lifeCycleState;
 
-        private PhotonView _playerPrefabPhotonView;
-        private MatchManager _matchManagerInstace;
+        private PhotonView      _playerPrefabPhotonView;
+        private MatchManager    _matchManagerInstace;
 
         public override void OnEnable() {
             // Register the manager as a callback reciever
             PhotonNetwork.AddCallbackTarget(this);
+
+            // For intialization when we load the game scene
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         public override void OnDisable() {
             // Unregister manager on disable
             PhotonNetwork.RemoveCallbackTarget(this);
+
+            // Unregister scene initialization
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         private void Awake() {
@@ -58,6 +72,32 @@ namespace Photon.Pun {
             } else if (instance != this) {
                 Debug.Log("Found an existing instance of the NetworkManager, destroying this one");
                 DestroyImmediate(this);
+            }
+
+            _lifeCycleState = NetworkManagerState.InMenu;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+            // Only for when we are loading into the game
+            if (_lifeCycleState == NetworkManagerState.InGame) {
+                InitializeGameNetworkManager();
+            }
+        }
+
+        private void InitializeGameNetworkManager() {
+            if (MatchManager.instance != null) {
+                _matchManagerInstace = MatchManager.instance;
+
+                // Do this BEFORE player prefab instantiation
+                _matchManagerInstace.SetPlayerSpawn(playerNumber);
+            } else {
+                Debug.LogError("NetworkManager cannot find MatchManager");
+            }
+
+            // Start the player!
+            if (isConnectedToMaster && isConnectedToRoom) {
+                InstantiatePlayerPrefab();
+                _matchManagerInstace.RemoteInitializeRound();
             }
         }
 
@@ -136,11 +176,6 @@ namespace Photon.Pun {
 
             Debug.Log("Joined as Player Number: " + playerNumber);
 
-            // TODO: Move these to a new initialization method once network connection between scenes is working
-            //_matchManagerInstace.SetPlayerSpawn(playerNumber);
-
-            //InstantiatePlayerPrefab();
-
             // Fire Event
             if (OnConnectedToRoom != null)
                 OnConnectedToRoom(PhotonNetwork.CurrentRoom.Name);
@@ -169,6 +204,8 @@ namespace Photon.Pun {
             // Load the game scene
             if (photonEvent.Code == 0) {
                 Debug.Log("Photon start game event recieved!");
+                _lifeCycleState = NetworkManagerState.InGame;
+                SceneManager.LoadScene(1, LoadSceneMode.Single);
             }
         }
 
